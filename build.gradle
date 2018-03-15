@@ -1,0 +1,79 @@
+plugins {
+  id 'java'
+  id 'org.xtext.xtend' version '1.0.21'
+  id 'eclipse'
+  id 'maven-publish'
+}
+
+ext {
+  javaVersion = '1.8'
+  vertxVersion = '3.5.1'
+  xtendVersion = '2.13.0'
+}
+
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion  
+
+eclipse {
+    classpath {
+        downloadSources = true
+        downloadJavadoc = true
+     }
+}
+
+xtend {
+    preferences = [ 'useJavaCompilerCompliance':true ]
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+
+task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+
+task packageSources(type: Jar, dependsOn: 'classes') {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact packageSources
+            artifact packageJavadoc
+        }
+    }
+}
+
+task install(dependsOn: publishToMavenLocal)
+
+dependencies {
+    compile "org.eclipse.xtend:org.eclipse.xtend.lib:${xtendVersion}"
+    compile 'org.slf4j:slf4j-api:1.7.21'
+    compile 'ch.qos.logback:logback-classic:1.1.7'
+    
+    compile "io.vertx:vertx-core:${vertxVersion}"
+    compile "io.vertx:vertx-web:${vertxVersion}"
+    compile "io.vertx:vertx-auth-jwt:${vertxVersion}"
+    compile "io.vertx:vertx-rx-java:${vertxVersion}"
+    compile "io.vertx:vertx-dropwizard-metrics:${vertxVersion}"
+    compile "io.vertx:vertx-service-discovery:${vertxVersion}"
+    compile "io.vertx:vertx-circuit-breaker:${vertxVersion}"
+    compile "io.vertx:vertx-hazelcast:${vertxVersion}"
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.assertj:assertj-core:3.3.0'
+    testCompile 'io.rest-assured:rest-assured:3.0.0'
+    testCompile "io.vertx:vertx-unit:${vertxVersion}"    
+}
+
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '4.6'
+}
